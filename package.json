@@ -1,0 +1,28 @@
+{
+  "name": "webgl-experiments",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unidospelosoftware/webgl-experiments.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/unidospelosoftware/webgl-experiments/issues"
+  },
+  "homepage": "https://github.com/unidospelosoftware/webgl-experiments#readme",
+  "dependencies": {
+    "canvas-sketch": "^0.2.0",
+    "canvas-sketch-util": "^1.6.0",
+    "glsl-hsl2rgb": "^1.1.0",
+    "glsl-noise": "0.0.0",
+    "glslify": "^7.0.0",
+    "three": "^0.102.1"
+  }
+}

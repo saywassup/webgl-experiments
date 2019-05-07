@@ -38,8 +38,44 @@ const sketch = ({ context }) => {
 
   const loader = new THREE.GLTFLoader();
 
+  const cubeMap = [
+    '../models/environment/posx.png',
+    '../models/environment/negx.png',
+    '../models/environment/posy.png',
+    '../models/environment/negy.png',
+    '../models/environment/posz.png',
+    '../models/environment/negz.png'
+  ];
+
+  const envMap = new THREE.CubeTextureLoader().load(cubeMap);
+  envMap.format = THREE.RGBFormat;
+
   loader.load('../models/mclaren/scene.gltf', (gltf) => {
-    scene.add(gltf.scene)
+    
+    const car = gltf.scene;
+    
+    scene.add(car);
+
+    car.position.set(0, 0, 1);
+
+    car.traverse(node => {
+      if (!node.isMesh) return;
+      
+      const materials = Array.isArray(node.material)
+        ? node.material
+        : [node.material];
+      
+      materials.forEach((material) => {
+        if (material.isMeshStandardMaterial || material.isGLTFSpecularGlossinessMaterial) {
+          debugger
+          material.envMap = envMap;
+          material.needsUpdate = true;
+        }
+      });
+    });
+
+    console.log(car);
+
   },
   null,
   err => console.log(err))

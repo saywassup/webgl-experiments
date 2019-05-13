@@ -16,6 +16,62 @@ const settings = {
   attributes: { antialias: true }
 };
 
+const setModel = () => {
+  object.updateMatrixWorld();
+  const box = new THREE.Box3().setFromObject(object);
+  const size = box.getSize(new THREE.Vector3()).length();
+  const center = box.getCenter(new THREE.Vector3());
+
+  object.position.x += (object.position.x - center.x);
+  object.position.y += (object.position.y - center.y);
+  object.position.z += (object.position.z - center.z);
+
+  this.scene.add(object);
+}
+
+const cubeMap = [
+  '../models/environment/posx.png',
+  '../models/environment/negx.png',
+  '../models/environment/posy.png',
+  '../models/environment/negy.png',
+  '../models/environment/posz.png',
+  '../models/environment/negz.png'
+];
+
+// Setup a camera
+let camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
+
+const envMap = new THREE.CubeTextureLoader().load(cubeMap);
+envMap.format = THREE.RGBFormat;
+
+const createEnvironmentMap = (node) => {
+  if (!node.isMesh) return;
+      
+  const materials = Array.isArray(node.material)
+    ? node.material
+    : [node.material];
+      
+  materials.forEach((material) => {
+    if (material.isMeshStandardMaterial || material.isGLTFSpecularGlossinessMaterial) {
+          material.envMap = envMap;
+          material.needsUpdate = true;
+      }
+    });
+};
+
+const selectCamera = (node) => {
+  if (node.isCamera) return;
+  
+  node.traverse(item => {
+    if(item.name === "Camera_Orientation") {
+      console.log('New camera HERE -> ', item);
+      camera = item;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    }
+  })
+};
+
 const sketch = ({ context }) => {
   // Create a renderer
   const renderer = new THREE.WebGLRenderer({
@@ -23,12 +79,7 @@ const sketch = ({ context }) => {
   });
 
   // WebGL background color
-  renderer.setClearColor('#FFF', 1);
-
-  // Setup a camera
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
-  camera.position.set(2, 2, -4);
-  camera.lookAt(new THREE.Vector3());
+  renderer.setClearColor('#000', 1);
 
   // Setup camera controller
   const controls = new THREE.OrbitControls(camera);
@@ -38,44 +89,24 @@ const sketch = ({ context }) => {
 
   const loader = new THREE.GLTFLoader();
 
-  const cubeMap = [
-    '../models/environment/posx.png',
-    '../models/environment/negx.png',
-    '../models/environment/posy.png',
-    '../models/environment/negy.png',
-    '../models/environment/posz.png',
-    '../models/environment/negz.png'
-  ];
-
-  const envMap = new THREE.CubeTextureLoader().load(cubeMap);
-  envMap.format = THREE.RGBFormat;
-
-  loader.load('../models/mclaren/scene.gltf', (gltf) => {
+  loader.load('../models/mclaren/mclaren.glb', (gltf) => {
     
     const car = gltf.scene;
+
+    // car.updateMatrixWorld();
+    const box = new THREE.Box3().setFromObject(car);
+    const center = box.getCenter(new THREE.Vector3());
+
+    car.position.x += (car.position.x - center.x);
+    car.position.y += (car.position.y - center.y);
+    car.position.z += (car.position.z - center.z);
     
     scene.add(car);
 
-    car.position.set(0, 0, 1);
-
     car.traverse(node => {
-      if (!node.isMesh) return;
-      
-      const materials = Array.isArray(node.material)
-        ? node.material
-        : [node.material];
-      
-      materials.forEach((material) => {
-        if (material.isMeshStandardMaterial || material.isGLTFSpecularGlossinessMaterial) {
-          debugger
-          material.envMap = envMap;
-          material.needsUpdate = true;
-        }
-      });
+      selectCamera(node, camera);
+      createEnvironmentMap(node);
     });
-
-    console.log(car);
-
   },
   null,
   err => console.log(err))
@@ -122,7 +153,6 @@ const sketch = ({ context }) => {
     },
     // Dispose of events & renderer for cleaner hot-reloading
     unload () {
-      controls.dispose();
       renderer.dispose();
     }
   };

@@ -23,6 +23,6 @@
     "glsl-hsl2rgb": "^1.1.0",
     "glsl-noise": "0.0.0",
     "glslify": "^7.0.0",
-    "three": "^0.102.1"
+    "three": "^0.125.0"
   }
 }
